@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 
@@ -21,10 +22,12 @@ public class TinyBankService {
 	private final Account account = new Account(BigDecimal.ZERO); // Tiny Bank has only one account
 
 	public TransactionResponse deposit(TransactionRequest request) {
-		final var transaction = new Transaction(randomUUID(), Direction.IN, request.amount(), Instant.now());
-		final var newBalance = account.getBalance().add(transaction.amount());
 
 		// From task description we are not expected to implement transactions/atomic operations
+
+		final var transaction = createTransaction(Direction.IN, request.amount());
+		final var newBalance = account.getBalance().add(transaction.amount());
+
 		account.setBalance(newBalance);
 		account.addToHistory(transaction);
 
@@ -32,14 +35,16 @@ public class TinyBankService {
 	}
 
 	public TransactionResponse withdraw(TransactionRequest request) throws InsufficientFundsException {
+
+		// From task description we are not expected to implement transactions/atomic operations
+
 		if(account.getBalance().compareTo(request.amount()) < 0) {
 			throw new InsufficientFundsException();
 		}
 
-		final var transaction = new Transaction(randomUUID(), Direction.OUT, request.amount(), Instant.now());
+		final var transaction = createTransaction(Direction.OUT, request.amount());
 		final var newBalance = account.getBalance().subtract(transaction.amount());
 
-		// From task description we are not expected to implement transactions/atomic operations
 		account.setBalance(newBalance);
 		account.addToHistory(transaction);
 
@@ -52,5 +57,14 @@ public class TinyBankService {
 
 	public List<Transaction> getTransactionHistory() {
 		return  account.getTransactionHistory();
+	}
+
+	private Transaction createTransaction(Direction direction, BigDecimal amount) {
+		UUID transactionId = randomUUID();
+		while(account.getTransaction(transactionId) != null) {
+			transactionId = randomUUID();
+		}
+
+		return new Transaction(transactionId, direction, amount, Instant.now());
 	}
 }

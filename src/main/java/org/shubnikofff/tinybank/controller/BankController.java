@@ -1,7 +1,6 @@
 package org.shubnikofff.tinybank.controller;
 
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.shubnikofff.tinybank.dto.TransactionRequest;
@@ -40,19 +39,17 @@ public class BankController {
 		try {
 			return ResponseEntity.ok(bankService.withdraw(request));
 		} catch (InsufficientFundsException e) {
-			// Simply return 400, also @ControllerAdvice can be used
+			// Simply return 400 instead of 500, also @ControllerAdvice can be used
 			return ResponseEntity.badRequest().build();
 		}
 	}
 
 	@GetMapping("balance")
-	@Operation(description = "Deposit account")
 	BigDecimal getBalance() {
 		return bankService.getBalance();
 	}
 
-	@GetMapping("transaction-history")
-	@Operation(description = "Deposit account")
+	@GetMapping("transaction-history") // Some filters could be applied here like date range, txn direction, amount range etc. as well as sorting options
 	List<Transaction> getTransactionHistory() {
 		return bankService.getTransactionHistory();
 	}
