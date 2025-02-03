@@ -1,5 +1,6 @@
 package org.shubnikofff.tinybank.service;
 
+import org.shubnikofff.tinybank.dto.TransactionHistoryResponse;
 import org.shubnikofff.tinybank.dto.TransactionRequest;
 import org.shubnikofff.tinybank.dto.TransactionResponse;
 import org.shubnikofff.tinybank.exception.InsufficientFundsException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +32,7 @@ public class TinyBankService {
 
 		account.setBalance(newBalance);
 		account.addToHistory(transaction);
+		account.setBalanceFor(transaction.id(), newBalance);
 
 		return new TransactionResponse(transaction, newBalance);
 	}
@@ -47,6 +50,7 @@ public class TinyBankService {
 
 		account.setBalance(newBalance);
 		account.addToHistory(transaction);
+		account.setBalanceFor(transaction.id(), newBalance);
 
 		return new TransactionResponse(transaction, newBalance);
 	}
@@ -55,8 +59,20 @@ public class TinyBankService {
 		return account.getBalance();
 	}
 
-	public List<Transaction> getTransactionHistory() {
-		return  account.getTransactionHistory();
+	public TransactionHistoryResponse getTransactionHistory(Instant date) {
+		final var transactions = account.getTransactionHistory()
+			.stream()
+			.sorted(Comparator.comparing(Transaction::createdAt))
+			.filter(transaction -> transaction.createdAt().compareTo(date) <= 0)
+			.toList();
+
+		if(transactions.isEmpty()) {
+			return new TransactionHistoryResponse(List.of(), BigDecimal.ZERO);
+		}
+
+		final var balance = account.getBalanceFor(transactions.getLast().id());
+
+		return new TransactionHistoryResponse(transactions, balance);
 	}
 
 	private Transaction createTransaction(Direction direction, BigDecimal amount) {

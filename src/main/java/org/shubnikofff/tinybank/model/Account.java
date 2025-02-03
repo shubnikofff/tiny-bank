@@ -12,6 +12,8 @@ public class Account {
 
 	private final Map<UUID, Transaction> transactionHistory = new HashMap<>();
 
+	private final Map<UUID, BigDecimal> balanceMap = new HashMap<>();
+
 	public Account(BigDecimal initialBalance) {
 		balance = initialBalance;
 	}
@@ -35,4 +37,17 @@ public class Account {
 	public Transaction getTransaction(UUID transactionId) {
 		return transactionHistory.get(transactionId);
 	}
+
+	public BigDecimal getBalanceFor(UUID txnId) {
+		if(balanceMap.isEmpty() || transactionHistory.isEmpty()) {
+			return BigDecimal.ZERO;
+		}
+
+		return balanceMap.getOrDefault(txnId, BigDecimal.ZERO);
+	}
+
+	public void setBalanceFor(UUID txnId, BigDecimal value) {
+		balanceMap.put(txnId, value);
+	}
+
 }

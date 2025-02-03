@@ -3,6 +3,7 @@ package org.shubnikofff.tinybank.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.shubnikofff.tinybank.dto.TransactionHistoryResponse;
 import org.shubnikofff.tinybank.dto.TransactionRequest;
 import org.shubnikofff.tinybank.dto.TransactionResponse;
 import org.shubnikofff.tinybank.exception.InsufficientFundsException;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -50,8 +53,8 @@ public class BankController {
 	}
 
 	@GetMapping("transaction-history") // Some filters could be applied here like date range, txn direction, amount range etc. as well as sorting options
-	List<Transaction> getTransactionHistory() {
-		return bankService.getTransactionHistory();
+	TransactionHistoryResponse getTransactionHistory(@RequestParam("date") Instant date) {
+		return bankService.getTransactionHistory(date);
 	}
 
 }
