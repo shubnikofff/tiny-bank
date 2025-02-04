@@ -7,6 +7,7 @@ import org.shubnikofff.tinybank.exception.InsufficientFundsException;
 import org.shubnikofff.tinybank.model.Transaction.Direction;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -33,8 +34,8 @@ class TinyBankServiceTest {
 		final var balance = tinyBankService.getBalance();
 		assertThat(balance).isEqualTo(expectedBalance);
 
-		final var transactionHistory = tinyBankService.getTransactionHistory();
-		assertThat(transactionHistory).hasSize(1).contains(transactionResponse.transaction());
+		final var transactionHistory = tinyBankService.getTransactionHistory(Instant.now());
+		assertThat(transactionHistory.history()).hasSize(1).contains(transactionResponse.transaction());
 	}
 
 	@Test
@@ -52,8 +53,8 @@ class TinyBankServiceTest {
 		final var balance = tinyBankService.getBalance();
 		assertThat(balance).isEqualTo(expectedBalance);
 
-		final var transactionHistory = tinyBankService.getTransactionHistory();
-		assertThat(transactionHistory).hasSize(2).contains(transactionResponse.transaction());
+		final var transactionHistory = tinyBankService.getTransactionHistory(Instant.now());
+		assertThat(transactionHistory.history()).hasSize(2).contains(transactionResponse.transaction());
 	}
 
 	@Test

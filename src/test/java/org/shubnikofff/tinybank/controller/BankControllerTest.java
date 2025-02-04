@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.shubnikofff.tinybank.dto.TransactionHistoryResponse;
 import org.shubnikofff.tinybank.dto.TransactionRequest;
 import org.shubnikofff.tinybank.service.TinyBankService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -69,10 +71,16 @@ class BankControllerTest {
 
 	@Test
 	void should_return_success_status_code_on_get_transaction_history_endpoint_test() throws Exception {
-		when(tinyBankService.getTransactionHistory()).thenReturn(List.of());
-		mockMvc.perform(get("/api/v1/transaction-history"))
+		final var now = Instant.now();
+
+		when(tinyBankService.getTransactionHistory(now)).thenReturn(new TransactionHistoryResponse(
+			List.of(),
+			BigDecimal.ZERO
+		));
+
+		mockMvc.perform(get("/api/v1/transaction-history").param("date", now.toString()))
 			.andExpect(status().isOk())
-			.andExpect(content().json("[]"));
+			.andExpect(content().json("{\"history\":[],\"balance\":0}"));
 	}
 
 	private static List<byte[]> badTransactionRequestBody() {
